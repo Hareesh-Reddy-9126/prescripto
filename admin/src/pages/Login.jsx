@@ -3,6 +3,7 @@ import { useContext, useState } from 'react'
 import { DoctorContext } from '../context/DoctorContext'
 import { AdminContext } from '../context/AdminContext'
 import { toast } from 'react-toastify'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 const Login = () => {
 
@@ -11,8 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL
-  const normalizedBackendUrl = backendUrl ? backendUrl.replace(/\/+$/, '') : ''
+  const normalizedBackendUrl = getBackendUrl()
 
   const { setDToken } = useContext(DoctorContext)
   const { setAToken } = useContext(AdminContext)
@@ -21,7 +21,7 @@ const Login = () => {
     event.preventDefault();
 
     if (!normalizedBackendUrl) {
-      toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment.')
+      toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment or provide deployed.json')
       return
     }
 

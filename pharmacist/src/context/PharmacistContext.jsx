@@ -2,15 +2,15 @@ import PropTypes from 'prop-types'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const PharmacistContext = createContext()
 
 const createApiClient = (token) => {
+  const base = getBackendUrl() || 'http://localhost:4000'
   const client = axios.create({
-    baseURL: `${API_BASE_URL}/api/pharmacist`,
+    baseURL: `${base}/api/pharmacist`,
   })
 
   client.interceptors.request.use((config) => {
@@ -63,7 +63,8 @@ export const PharmacistProvider = ({ children }) => {
   const login = useCallback(async ({ email, password }) => {
     try {
       setLoading(true)
-      const { data } = await axios.post(`${API_BASE_URL}/api/pharmacist/login`, { email, password })
+      const base = getBackendUrl() || 'http://localhost:4000'
+      const { data } = await axios.post(`${base}/api/pharmacist/login`, { email, password })
 
       if (!data.success) {
         toast.error(data.message || 'Unable to login')

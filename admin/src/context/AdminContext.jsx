@@ -2,13 +2,14 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { createContext, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 
 export const AdminContext = createContext()
 
 const AdminContextProvider = (props) => {
 
-    const backendUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '')
+    // backendUrl resolved at runtime (build-time VITE or runtime deployed.json)
 
     const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
 
@@ -20,26 +21,28 @@ const AdminContextProvider = (props) => {
 
     // Getting all Doctors data from Database using API
     const getAllDoctors = useCallback(async () => {
-
         try {
-
+            const backendUrl = getBackendUrl()
+            if (!backendUrl) {
+                toast.error('Backend URL not configured. Provide VITE_BACKEND_URL or deployed.json')
+                return
+            }
             const { data } = await axios.get(backendUrl + '/api/admin/all-doctors', { headers: { aToken } })
             if (data.success) {
                 setDoctors(data.doctors)
             } else {
                 toast.error(data.message)
             }
-
         } catch (error) {
             toast.error(error.message)
         }
-
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     // Function to change doctor availablity using API
     const changeAvailability = useCallback(async (docId) => {
         try {
 
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
@@ -52,55 +55,47 @@ const AdminContextProvider = (props) => {
             console.log(error)
             toast.error(error.message)
         }
-    }, [aToken, backendUrl, getAllDoctors])
+    }, [aToken, getAllDoctors])
 
 
     // Getting all appointment data from Database using API
     const getAllAppointments = useCallback(async () => {
-
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(backendUrl + '/api/admin/appointments', { headers: { aToken } })
             if (data.success) {
                 setAppointments(data.appointments.reverse())
             } else {
                 toast.error(data.message)
             }
-
         } catch (error) {
             toast.error(error.message)
             console.log(error)
         }
-
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     // Function to cancel appointment using API
     const cancelAppointment = useCallback(async (appointmentId) => {
-
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(backendUrl + '/api/admin/cancel-appointment', { appointmentId }, { headers: { aToken } })
-
             if (data.success) {
                 toast.success(data.message)
                 getAllAppointments()
             } else {
                 toast.error(data.message)
             }
-
         } catch (error) {
             toast.error(error.message)
             console.log(error)
         }
-
-    }, [aToken, backendUrl, getAllAppointments])
+    }, [aToken, getAllAppointments])
 
     // Getting Admin Dashboard data from Database using API
     const getDashData = useCallback(async () => {
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(backendUrl + '/api/admin/dashboard', { headers: { aToken } })
-
             if (data.success) {
                 setDashData(data.dashData)
                 return true
@@ -108,18 +103,18 @@ const AdminContextProvider = (props) => {
                 toast.error(data.message)
                 setDashData(null)
             }
-
         } catch (error) {
             console.log(error)
             toast.error(error.message)
             setDashData(null)
         }
         return false
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     // Pharmacies: list pending/approved
     const getPharmacies = useCallback(async (status) => {
         try {
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(`${backendUrl}/api/admin/pharmacies`, { params: { status }, headers: { aToken } })
             if (data.success) {
                 if (status === 'pending') {
@@ -134,11 +129,12 @@ const AdminContextProvider = (props) => {
             console.log(error)
             toast.error(error.message)
         }
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     // Pharmacies: approve/reject
     const reviewPharmacy = useCallback(async ({ pharmacyId, approve, notes }) => {
         try {
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(`${backendUrl}/api/admin/pharmacies/review`, { pharmacyId, approve, notes }, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
@@ -150,11 +146,12 @@ const AdminContextProvider = (props) => {
             console.log(error)
             toast.error(error.message)
         }
-    }, [aToken, backendUrl, getPharmacies])
+    }, [aToken, getPharmacies])
 
     // Pharmacies: toggle active
     const togglePharmacyActive = useCallback(async ({ pharmacyId, isActive }) => {
         try {
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(`${backendUrl}/api/admin/pharmacies/toggle-active`, { pharmacyId, isActive }, { headers: { aToken } })
             if (data.success) {
                 toast.success('Pharmacy status updated')
@@ -166,11 +163,12 @@ const AdminContextProvider = (props) => {
             console.log(error)
             toast.error(error.message)
         }
-    }, [aToken, backendUrl, getPharmacies])
+    }, [aToken, getPharmacies])
 
     const loadPlatformSettings = useCallback(async () => {
         if (!aToken) return null
         try {
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(`${backendUrl}/api/admin/settings`, { headers: { aToken } })
             if (data.success) {
                 setPlatformSettings(data.settings)
@@ -182,11 +180,12 @@ const AdminContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     const savePlatformSettings = useCallback(async (payload) => {
         if (!aToken) return false
         try {
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(`${backendUrl}/api/admin/settings`, payload, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
@@ -199,7 +198,7 @@ const AdminContextProvider = (props) => {
             toast.error(error.message)
         }
         return false
-    }, [aToken, backendUrl])
+    }, [aToken])
 
     const value = useMemo(() => ({
         aToken,

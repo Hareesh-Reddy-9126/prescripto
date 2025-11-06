@@ -2,13 +2,16 @@ import axios from 'axios'
 import PropTypes from 'prop-types'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 export const AppContext = createContext()
 
 const AppContextProvider = (props) => {
 
     const currencySymbol = '₹'
-    const backendUrl = (import.meta.env.VITE_BACKEND_URL || '').trim().replace(/\/+$/, '')
+    // backendUrl will be resolved at runtime: prefer Vite build env, otherwise
+    // read runtime deployed.json (set on window.__DEPLOYED by main.jsx)
+    // Note: keep this local inside callbacks to reflect any runtime changes.
 
     const [doctors, setDoctors] = useState([])
     const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '')
@@ -16,11 +19,10 @@ const AppContextProvider = (props) => {
 
     // Getting Doctors using API
     const getDoctosData = useCallback(async () => {
-
         try {
-
+            const backendUrl = getBackendUrl()
             if (!backendUrl) {
-                toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment file.')
+                toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment or provide deployed.json')
                 return
             }
 
@@ -34,16 +36,14 @@ const AppContextProvider = (props) => {
         } catch (error) {
             toast.error(error.message)
         }
-
-    }, [backendUrl])
+    }, [])
 
     // Getting User Profile using API
     const loadUserProfileData = useCallback(async () => {
-
         try {
-
+            const backendUrl = getBackendUrl()
             if (!backendUrl) {
-                toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment file.')
+                toast.error('Backend URL is not configured. Please set VITE_BACKEND_URL in your environment or provide deployed.json')
                 return
             }
 
@@ -58,8 +58,7 @@ const AppContextProvider = (props) => {
         } catch (error) {
             toast.error(error.message)
         }
-
-    }, [backendUrl, token])
+    }, [token])
 
     useEffect(() => {
         getDoctosData()
@@ -75,13 +74,13 @@ const AppContextProvider = (props) => {
         doctors,
         getDoctosData,
         currencySymbol,
-        backendUrl,
+        backendUrl: getBackendUrl(),
         token,
         setToken,
         userData,
         setUserData,
         loadUserProfileData,
-    }), [backendUrl, currencySymbol, doctors, getDoctosData, loadUserProfileData, token, userData])
+    }), [currencySymbol, doctors, getDoctosData, loadUserProfileData, token, userData])
 
     return (
         <AppContext.Provider value={value}>

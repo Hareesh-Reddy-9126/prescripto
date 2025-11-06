@@ -25,7 +25,26 @@ const startServer = async () => {
 
     // middlewares
     app.use(express.json())
-    app.use(cors())
+
+    // CORS: use a whitelist from ALLOWED_ORIGINS (comma-separated) when provided,
+    // otherwise allow all origins (default existing behavior).
+    const allowed = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean)
+    if (allowed.length > 0) {
+      app.use(cors({
+        origin: function (origin, callback) {
+          // allow requests with no origin like mobile apps or curl
+          if (!origin) return callback(null, true)
+          if (allowed.indexOf(origin) !== -1) {
+            return callback(null, true)
+          }
+          return callback(new Error('CORS policy: origin not allowed'))
+        },
+        credentials: true,
+      }))
+    } else {
+      // permissive fallback to preserve existing deployments until ALLOWED_ORIGINS is set
+      app.use(cors())
+    }
 
     // api endpoints
     app.use("/api/user", userRouter)

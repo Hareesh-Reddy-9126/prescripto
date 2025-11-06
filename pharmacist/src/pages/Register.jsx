@@ -3,8 +3,9 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.svg'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+const API_BASE_URL = getBackendUrl() || 'https://hospital-backend-8le6.onrender.com'
 
 const Register = () => {
   const navigate = useNavigate()

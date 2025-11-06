@@ -2,13 +2,12 @@ import axios from 'axios'
 import PropTypes from 'prop-types'
 import { createContext, useCallback, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 
 export const DoctorContext = createContext()
 
 const DoctorContextProvider = (props) => {
-
-    const backendUrl = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '')
 
     const [dToken, setDToken] = useState(localStorage.getItem('dToken') ? localStorage.getItem('dToken') : '')
     const [appointments, setAppointments] = useState([])
@@ -20,6 +19,7 @@ const DoctorContextProvider = (props) => {
     const getAppointments = useCallback(async () => {
         try {
 
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(backendUrl + '/api/doctor/appointments', { headers: { dToken } })
 
             if (data.success) {
@@ -31,26 +31,24 @@ const DoctorContextProvider = (props) => {
         } catch (error) {
             toast.error(error.message)
         }
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     // Getting Doctor profile data from Database using API
     const getProfileData = useCallback(async () => {
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(backendUrl + '/api/doctor/profile', { headers: { dToken } })
             setProfileData(data.profileData)
-
         } catch (error) {
             toast.error(error.message)
         }
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     // Getting Doctor dashboard data using API
     const getDashData = useCallback(async () => {
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.get(backendUrl + '/api/doctor/dashboard', { headers: { dToken } })
-
             if (data.success) {
                 setDashData(data.dashData)
                 return true
@@ -58,21 +56,18 @@ const DoctorContextProvider = (props) => {
                 toast.error(data.message)
                 setDashData(null)
             }
-
         } catch (error) {
             toast.error(error.message)
             setDashData(null)
         }
         return false
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     // Function to cancel doctor appointment using API
     const cancelAppointment = useCallback(async (appointmentId) => {
-
         try {
-
+            const backendUrl = getBackendUrl()
             const { data } = await axios.post(backendUrl + '/api/doctor/cancel-appointment', { appointmentId }, { headers: { dToken } })
-
             if (data.success) {
                 toast.success(data.message)
                 getAppointments()
@@ -81,21 +76,16 @@ const DoctorContextProvider = (props) => {
             } else {
                 toast.error(data.message)
             }
-
         } catch (error) {
             toast.error(error.message)
         }
-
-    }, [backendUrl, dToken, getAppointments, getDashData])
+    }, [dToken, getAppointments, getDashData])
 
     // Function to Mark appointment completed using API
     const ensureConsultation = useCallback(async (appointmentId) => {
         try {
-            const { data } = await axios.post(
-                `${backendUrl}/api/consultations/doctor/schedule`,
-                { appointmentId },
-                { headers: { dToken } },
-            )
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.post(`${backendUrl}/api/consultations/doctor/schedule`, { appointmentId }, { headers: { dToken } })
 
             if (data.success) {
                 setConsultationCache((prev) => ({ ...prev, [appointmentId]: data.consultation }))
@@ -107,15 +97,12 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     const startConsultation = useCallback(async (appointmentId) => {
         try {
-            const { data } = await axios.post(
-                `${backendUrl}/api/consultations/doctor/start`,
-                { appointmentId },
-                { headers: { dToken } },
-            )
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.post(`${backendUrl}/api/consultations/doctor/start`, { appointmentId }, { headers: { dToken } })
 
             if (data.success) {
                 setConsultationCache((prev) => ({ ...prev, [appointmentId]: data.consultation }))
@@ -126,18 +113,15 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     const getConsultationDetails = useCallback(async (appointmentId) => {
         try {
             const cached = consultationCache[appointmentId]
             if (cached) return cached
 
-            const { data } = await axios.post(
-                `${backendUrl}/api/consultations/doctor/details`,
-                { appointmentId },
-                { headers: { dToken } },
-            )
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.post(`${backendUrl}/api/consultations/doctor/details`, { appointmentId }, { headers: { dToken } })
 
             if (data.success) {
                 setConsultationCache((prev) => ({ ...prev, [appointmentId]: data.consultation }))
@@ -148,15 +132,12 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [backendUrl, consultationCache, dToken])
+    }, [consultationCache, dToken])
 
     const completeConsultation = useCallback(async ({ appointmentId, summary, followUpDate, notesForPatient, notesForInternal }) => {
         try {
-            const { data } = await axios.post(
-                `${backendUrl}/api/consultations/doctor/complete`,
-                { appointmentId, summary, followUpDate, notesForPatient, notesForInternal },
-                { headers: { dToken } },
-            )
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.post(`${backendUrl}/api/consultations/doctor/complete`, { appointmentId, summary, followUpDate, notesForPatient, notesForInternal }, { headers: { dToken } })
 
             if (data.success) {
                 toast.success('Consultation saved')
@@ -170,7 +151,7 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return false
-    }, [backendUrl, dToken, getAppointments, getDashData])
+    }, [dToken, getAppointments, getDashData])
 
     const uploadLabReport = useCallback(async ({ appointmentId, title, description, file }) => {
         try {
@@ -180,16 +161,8 @@ const DoctorContextProvider = (props) => {
             if (description) formData.append('description', description)
             if (file) formData.append('report', file)
 
-            const { data } = await axios.post(
-                `${backendUrl}/api/records/doctor/lab-report`,
-                formData,
-                {
-                    headers: {
-                        dToken,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                },
-            )
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.post(`${backendUrl}/api/records/doctor/lab-report`, formData, { headers: { dToken, 'Content-Type': 'multipart/form-data' } })
 
             if (data.success) {
                 toast.success('Lab report shared with patient')
@@ -201,15 +174,12 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     const getAppointmentRecords = useCallback(async (appointmentId) => {
         try {
-            const { data } = await axios.get(
-                `${backendUrl}/api/records/doctor/appointment/${appointmentId}`,
-                { headers: { dToken } },
-            )
-
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.get(`${backendUrl}/api/records/doctor/appointment/${appointmentId}`, { headers: { dToken } })
             if (data.success) {
                 return data
             }
@@ -218,12 +188,12 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
         return null
-    }, [backendUrl, dToken])
+    }, [dToken])
 
     const value = useMemo(() => ({
         dToken,
         setDToken,
-        backendUrl,
+        backendUrl: getBackendUrl(),
         appointments,
         getAppointments,
         cancelAppointment,
@@ -238,7 +208,7 @@ const DoctorContextProvider = (props) => {
         profileData,
         setProfileData,
         getProfileData,
-    }), [appointments, backendUrl, cancelAppointment, completeConsultation, dashData, dToken, ensureConsultation, getAppointmentRecords, getAppointments, getConsultationDetails, getDashData, getProfileData, profileData, startConsultation, uploadLabReport])
+    }), [appointments, cancelAppointment, completeConsultation, dashData, dToken, ensureConsultation, getAppointmentRecords, getAppointments, getConsultationDetails, getDashData, getProfileData, profileData, startConsultation, uploadLabReport])
 
     return (
         <DoctorContext.Provider value={value}>
