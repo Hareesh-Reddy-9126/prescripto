@@ -1,6 +1,7 @@
 import axios from 'axios'
 import PropTypes from 'prop-types'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getBackendUrl } from '../utils/runtimeConfig'
 
@@ -65,6 +66,8 @@ const AppContextProvider = (props) => {
         getDoctosData()
     }, [getDoctosData])
 
+    const location = useLocation()
+
     useEffect(() => {
         // if the URL contains ?forceLogin=1, clear any stored token and skip verification
         const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
@@ -105,7 +108,7 @@ const AppContextProvider = (props) => {
         }
 
         verifyStored()
-    }, [token, loadUserProfileData])
+    }, [token, loadUserProfileData, location.search])
 
     const value = useMemo(() => ({
         doctors,
