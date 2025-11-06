@@ -1,6 +1,6 @@
 {
   "frontendUrl": "https://frontend-three-blond-79.vercel.app/",
   "adminUrl": "https://admin-swart-mu.vercel.app/",
-  "pharmacistUrl": "https://pharmacist-pied.vercel.app/login",
+  "pharmacistUrl": "https://pharmacist-pied.vercel.app/",
   "backendUrl": "https://hospital-backend-8le6.onrender.com"
 }
