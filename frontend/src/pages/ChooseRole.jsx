@@ -42,8 +42,6 @@ const ChooseRole = () => {
       // ignore
     }
 
-    localStorage.setItem('token', 'fake-or-stale-token')
-
     if (url) {
       try {
         const target = new URL(url, window.location.origin)
