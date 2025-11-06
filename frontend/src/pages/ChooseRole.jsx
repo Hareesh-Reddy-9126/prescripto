@@ -1,21 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 const ChooseRole = () => {
-  const adminUrl = import.meta.env.VITE_ADMIN_URL || ''
-  const doctorUrl = import.meta.env.VITE_DOCTOR_URL || ''
-  const pharmacistUrl = import.meta.env.VITE_PHARMACIST_URL || ''
-  const patientUrl = import.meta.env.VITE_FRONTEND_URL || ''
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
+  const [urls, setUrls] = useState({
+    admin: import.meta.env.VITE_ADMIN_URL || '',
+    doctor: import.meta.env.VITE_DOCTOR_URL || '',
+    pharmacist: import.meta.env.VITE_PHARMACIST_URL || '',
+    frontend: import.meta.env.VITE_FRONTEND_URL || '',
+    backend: import.meta.env.VITE_BACKEND_URL || ''
+  })
+
+  useEffect(() => {
+    // if any URL missing, try to load fallback deployed.json hosted in public/
+    const needsFallback = !urls.admin || !urls.pharmacist || !urls.frontend || !urls.backend
+    if (needsFallback) {
+      fetch('/deployed.json')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (!data) return
+          setUrls(prev => ({
+            admin: prev.admin || data.adminUrl || '',
+            doctor: prev.doctor || data.doctorUrl || '',
+            pharmacist: prev.pharmacist || data.pharmacistUrl || '',
+            frontend: prev.frontend || data.frontendUrl || '',
+            backend: prev.backend || data.backendUrl || ''
+          }))
+        })
+        .catch(() => {
+          // ignore fetch errors — env vars may still be present
+        })
+    }
+  }, [])
 
   const open = (url, fallback) => {
-    if (url) {
-      // open external deployed app
-      window.location.href = url
-    } else if (fallback) {
-      window.location.href = fallback
-    } else {
-      alert('Dashboard URL not configured. Please ask the administrator.')
-    }
+    if (url) window.location.href = url
+    else if (fallback) window.location.href = fallback
+    else alert('Dashboard URL not configured. Please ask the administrator.')
   }
 
   return (
@@ -25,10 +44,10 @@ const ChooseRole = () => {
         <p className="mb-6 text-sm text-gray-600">Select the role you want to sign in as. If your project's live URL is configured, you'll be redirected to that app's login page.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button onClick={() => open(patientUrl, '/login')} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
-          <button onClick={() => open(doctorUrl, '')} className="px-4 py-3 rounded-lg bg-indigo-600 text-white">Doctor</button>
-          <button onClick={() => open(pharmacistUrl, '')} className="px-4 py-3 rounded-lg bg-emerald-600 text-white">Pharmacist</button>
-          <button onClick={() => open(adminUrl, '')} className="px-4 py-3 rounded-lg bg-gray-800 text-white">Admin</button>
+          <button onClick={() => open(urls.frontend || '/login', '/login')} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
+          <button onClick={() => open(urls.doctor || '')} className="px-4 py-3 rounded-lg bg-indigo-600 text-white">Doctor</button>
+          <button onClick={() => open(urls.pharmacist || '')} className="px-4 py-3 rounded-lg bg-emerald-600 text-white">Pharmacist</button>
+          <button onClick={() => open(urls.admin || '')} className="px-4 py-3 rounded-lg bg-gray-800 text-white">Admin</button>
         </div>
 
         <div className="mt-6 text-xs text-gray-500">
