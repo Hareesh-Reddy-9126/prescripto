@@ -31,7 +31,14 @@ const ChooseRole = () => {
     }
   }, [])
 
-  const open = (url, fallback) => {
+  const normalizeUrl = (u) => {
+    if (!u) return ''
+    // if url missing protocol but looks like hostname, prefix https://
+    if (/^[a-z0-9.-]+(\/.*)?$/i.test(u)) return `https://${u}`
+    return u
+  }
+
+  const open = (url, fallback, params = {}) => {
     // clear local tokens in current app to avoid immediate auto-login
     try {
       localStorage.removeItem('token')
@@ -42,22 +49,34 @@ const ChooseRole = () => {
       // ignore
     }
 
-    if (url) {
-      try {
-        const target = new URL(url, window.location.origin)
-        const sep = target.search ? '&' : '?'
-        window.location.href = url + sep + 'forceLogin=1'
-        return
-      } catch (e) {
-        // if URL constructor fails, append param in a safe way
-        const sep = url.includes('?') ? '&' : '?'
-        window.location.href = url + sep + 'forceLogin=1'
-        return
-      }
-    } else if (fallback) {
-      const sep = fallback.includes('?') ? '&' : '?'
-      window.location.href = fallback + sep + 'forceLogin=1'
-    } else alert('Dashboard URL not configured. Please ask the administrator.')
+    let final = ''
+    if (url) final = normalizeUrl(url)
+    else if (fallback) final = normalizeUrl(fallback)
+    else {
+      alert('Dashboard URL not configured. Please ask the administrator.')
+      return
+    }
+
+    try {
+      const target = new URL(final, window.location.origin)
+      const search = new URLSearchParams(target.search)
+      // merge provided params
+      Object.entries(params).forEach(([k, v]) => {
+        if (v != null) search.set(k, String(v))
+      })
+      // always force login
+      search.set('forceLogin', '1')
+      target.search = search.toString()
+      // full navigation
+      window.location.href = target.toString()
+    } catch (e) {
+      // fallback if URL parsing fails
+      const sep = final.includes('?') ? '&' : '?'
+      const pairs = []
+      Object.entries(params).forEach(([k, v]) => v != null && pairs.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`))
+      pairs.push('forceLogin=1')
+      window.location.href = final + sep + pairs.join('&')
+    }
   }
 
   return (
@@ -69,11 +88,9 @@ const ChooseRole = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button onClick={() => open(urls.frontend || '/login', '/login')} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
           <button onClick={() => {
-            // prefer explicit doctor URL, otherwise fall back to admin app
             const base = urls.doctor || urls.admin || ''
             if (!base) return alert('Doctor dashboard not configured')
-            const sep = base.includes('?') ? '&' : '?'
-            open(base + sep + 'role=doctor')
+            open(base, '', { role: 'doctor' })
           }} className="px-4 py-3 rounded-lg bg-indigo-600 text-white">Doctor</button>
           <button onClick={() => open(urls.pharmacist || '')} className="px-4 py-3 rounded-lg bg-emerald-600 text-white">Pharmacist</button>
           <button onClick={() => open(urls.admin || '')} className="px-4 py-3 rounded-lg bg-gray-800 text-white">Admin</button>
