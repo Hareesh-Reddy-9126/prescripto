@@ -1,0 +1,36 @@
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# dotenv
+.env
+.env.*
+
+# build outputs
+dist/
+build/
+/.vercel/
+/.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# logs
+*.log
+
+# local env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
