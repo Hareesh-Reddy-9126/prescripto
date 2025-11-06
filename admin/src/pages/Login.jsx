@@ -4,6 +4,7 @@ import { DoctorContext } from '../context/DoctorContext'
 import { AdminContext } from '../context/AdminContext'
 import { toast } from 'react-toastify'
 import { getBackendUrl } from '../utils/runtimeConfig'
+import { useEffect } from 'react'
 
 const Login = () => {
 
@@ -16,6 +17,16 @@ const Login = () => {
 
   const { setDToken } = useContext(DoctorContext)
   const { setAToken } = useContext(AdminContext)
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const role = params.get('role')
+      if (role === 'doctor') setState('Doctor')
+    } catch (e) {
+      // ignore
+    }
+  }, [])
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();

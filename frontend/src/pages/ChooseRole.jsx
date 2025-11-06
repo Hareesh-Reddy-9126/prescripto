@@ -70,7 +70,13 @@ const ChooseRole = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button onClick={() => open(urls.frontend || '/login', '/login')} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
-          <button onClick={() => open(urls.doctor || '')} className="px-4 py-3 rounded-lg bg-indigo-600 text-white">Doctor</button>
+          <button onClick={() => {
+            // prefer explicit doctor URL, otherwise fall back to admin app
+            const base = urls.doctor || urls.admin || ''
+            if (!base) return alert('Doctor dashboard not configured')
+            const sep = base.includes('?') ? '&' : '?'
+            open(base + sep + 'role=doctor')
+          }} className="px-4 py-3 rounded-lg bg-indigo-600 text-white">Doctor</button>
           <button onClick={() => open(urls.pharmacist || '')} className="px-4 py-3 rounded-lg bg-emerald-600 text-white">Pharmacist</button>
           <button onClick={() => open(urls.admin || '')} className="px-4 py-3 rounded-lg bg-gray-800 text-white">Admin</button>
         </div>
