@@ -15,7 +15,7 @@ const Login = () => {
 
   const navigate = useNavigate()
   const location = useLocation()
-  const { backendUrl, token, setToken } = useContext(AppContext)
+  const { backendUrl, token, setToken, initializing } = useContext(AppContext)
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -66,11 +66,15 @@ const Login = () => {
 
   }
 
+  // Only redirect to home if we have a confirmed token and the app finished
+  // its initialization/verification phase. This prevents immediate redirect
+  // when SPA navigation includes `?forceLogin=1` and the context is still
+  // clearing/verifying stored tokens.
   useEffect(() => {
-    if (token) {
+    if (token && !initializing) {
       navigate('/')
     }
-  }, [navigate, token])
+  }, [navigate, token, initializing])
 
   // Sync state with query param (?tab=signup|login)
   useEffect(() => {
