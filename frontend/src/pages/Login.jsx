@@ -71,6 +71,18 @@ const Login = () => {
   // when SPA navigation includes `?forceLogin=1` and the context is still
   // clearing/verifying stored tokens.
   useEffect(() => {
+    // If URL includes ?forceLogin=1, ensure tokens are cleared so the
+    // login form will be shown even if some stale token existed.
+    try {
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+      if (params && params.get('forceLogin') === '1') {
+        try { localStorage.removeItem('token') } catch (e) {}
+        setToken('')
+      }
+    } catch (e) {
+      // ignore
+    }
+
     if (token && !initializing) {
       navigate('/')
     }

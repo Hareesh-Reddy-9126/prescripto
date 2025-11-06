@@ -18,6 +18,27 @@ import AppContextProvider from './context/AppContext.jsx'
     // console.warn('runtime deployed.json not loaded', e)
   }
 
+  // If the incoming URL explicitly requests a forced login, clear any
+  // stored tokens immediately before React mounts to avoid race conditions
+  // where components read a stale token and auto-redirect.
+  try {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params && params.get('forceLogin') === '1') {
+        try {
+          localStorage.removeItem('token')
+          localStorage.removeItem('aToken')
+          localStorage.removeItem('dToken')
+          localStorage.removeItem('pToken')
+        } catch (e) {
+          // ignore storage errors
+        }
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
   ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AppContextProvider>
