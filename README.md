@@ -4,18 +4,6 @@
 The **Hospital Management System** is a full-stack web application built using the **MERN stack (MongoDB, Express, React, Node.js)**.  
 It helps manage hospital operations efficiently by providing **role-based dashboards** for Patients, Doctors, Pharmacists, and Admins — all connected to a single backend API.
 
----
-
-### 🌐 Live Demo Links
-| Module | Live URL |
-|---------|-----------|
-| 🧍‍♂️ Main Frontend (Login + Patient) | [https://hospital-main.vercel.app](https://hospital-main.vercel.app) |
-| 👨‍⚕️ Admin & Doctor Dashboard | [https://hospital-admin.vercel.app](https://hospital-admin.vercel.app) |
-| 💊 Pharmacist Dashboard | [https://hospital-pharma.vercel.app](https://hospital-pharma.vercel.app) |
-| ⚙️ Backend API (Render) | [https://hospital-api.onrender.com](https://hospital-api.onrender.com) |
-
----
-
 ### 🧩 Features
 - 🔐 **Role-Based Authentication** (Patient, Doctor, Pharmacist, Admin)
 - 🧾 **JWT-Based Secure Login System**
@@ -28,10 +16,8 @@ It helps manage hospital operations efficiently by providing **role-based dashbo
 - ⚙️ **Backend hosted on Render**
 - 🌐 **Frontends deployed on Vercel**
 
----
-
 ### 🧠 Project Structure
-```
+
 
 project/
 ├── backend/          → Node.js + Express + MongoDB + JWT + Cloudinary
@@ -40,9 +26,6 @@ project/
 ├── pharmacist/       → Pharmacist dashboard
 
 ````
-
----
-
 ### 🧰 Tech Stack
 **Frontend:** React (Vite)  
 **Backend:** Node.js, Express.js  
@@ -51,29 +34,6 @@ project/
 **Cloud Storage:** Cloudinary  
 **Deployment:** Render (backend) + Vercel (frontends)
 
----
-
-### ⚙️ Environment Variables
-#### Backend (.env)
-```bash
-CURRENCY=INR
-JWT_SECRET=greatstack
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=greatstack123
-MONGODB_URI=mongodb+srv://hareeshreddy:hareeshreddy@cluster0.hvmiymd.mongodb.net
-MONGODB_DB_NAME=prescripto
-CLOUDINARY_NAME=dl4vykg6c
-CLOUDINARY_API_KEY=876265813819426
-CLOUDINARY_SECRET_KEY=zbGRnPwSwvEaDHz-J_TkbUovINg
-````
-
-#### Frontends (.env)
-
-```bash
-VITE_API_URL=https://hospital-api.onrender.com
-```
-
----
 
 ### 🧾 Deployment Summary
 
@@ -84,11 +44,8 @@ VITE_API_URL=https://hospital-api.onrender.com
 | **MongoDB Atlas** | Database  | Patient, Doctor, and Hospital Data |
 | **Cloudinary**    | Storage   | Upload and manage images securely  |
 
----
-
 ### 🧑‍💻 How to Run Locally
 
-```bash
 # Clone the repo
 git clone https://github.com/<your-username>/<repo-name>.git
 cd project
@@ -102,9 +59,7 @@ npm start
 cd ../frontend
 npm install
 npm run dev
-```
 
----
 
 ### 🧠 Login Roles
 
@@ -114,8 +69,6 @@ npm run dev
 | **Doctor**     | (create via signup)                           | —             |
 | **Pharmacist** | (create via signup)                           | —             |
 | **Patient**    | (create via signup)                           | —             |
-
----
 
 ### 🧑‍🎓 Developed By
 
