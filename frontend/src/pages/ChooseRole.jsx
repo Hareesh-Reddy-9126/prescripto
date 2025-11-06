@@ -86,7 +86,12 @@ const ChooseRole = () => {
         <p className="mb-6 text-sm text-gray-600">Select the role you want to sign in as. If your project's live URL is configured, you'll be redirected to that app's login page.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button onClick={() => open(urls.frontend || '/login', '/login')} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
+          <button onClick={() => {
+            // Ensure we navigate to the login route (not root) so the login form appears.
+            const base = urls.frontend || ''
+            const target = base ? `${base.replace(/\/+$/,'')}/login` : '/login'
+            open(target, '/login')
+          }} className="px-4 py-3 rounded-lg bg-primary text-white">Patient (User)</button>
           <button onClick={() => {
             const base = urls.doctor || urls.admin || ''
             if (!base) return alert('Doctor dashboard not configured')
