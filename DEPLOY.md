@@ -74,6 +74,11 @@ npm run dev
 ## CORS and security
 - Backend currently uses `app.use(cors())` (open to all origins). That will work for Vercel domains. If you restrict CORS in production, add your Vercel domains to the allow list.
 - Keep JWT_SECRET and other secrets private — only set them in the host's environment settings (Render / Vercel env variables) — never commit them.
+## CORS and security
+- Backend currently uses `app.use(cors())` (open to all origins). That will work for Vercel domains.
+- Recommended: set an environment variable on the backend host named `ALLOWED_ORIGINS` with a comma-separated list of your production frontends (for example: `https://frontend-three-blond-79.vercel.app,https://admin-swart-mu.vercel.app,https://pharmacist-pied.vercel.app`).
+- The server will use `ALLOWED_ORIGINS` as a whitelist if present; otherwise it falls back to permissive CORS to preserve backward compatibility.
+- Keep JWT_SECRET and other secrets private — only set them in the host's environment settings (Render / Vercel env variables) — never commit them.
 
 ## Verification checklist after deploy
 1. Backend: `GET /` should return `API Working` on the Render URL.
