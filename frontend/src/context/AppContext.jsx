@@ -78,19 +78,29 @@ const AppContextProvider = (props) => {
             return
         }
 
-        if (token) {
-            loadUserProfileData()
-            setInitializing(false)
-            return
-        }
-
-        // verify stored token on mount
+        // If an in-memory token is already present (e.g. user just logged in),
+        // wait for profile load to complete before clearing the initializing
+        // flag. This prevents immediate redirects while verification is still
+        // in-flight.
         const verifyStored = async () => {
             const stored = localStorage.getItem('token')
+            // If URL asked to force login we already returned above.
+            if (token) {
+                try {
+                    await loadUserProfileData()
+                } catch (e) {
+                    // ignore
+                } finally {
+                    setInitializing(false)
+                }
+                return
+            }
+
             if (!stored) {
                 setInitializing(false)
                 return
             }
+
             try {
                 const backendUrl = getBackendUrl()
                 const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, { headers: { token: stored } })
