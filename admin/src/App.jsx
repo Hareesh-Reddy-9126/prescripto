@@ -13,6 +13,7 @@ import DoctorsList from './pages/Admin/DoctorsList';
 import Pharmacies from './pages/Admin/Pharmacies';
 import Settings from './pages/Admin/Settings';
 import Login from './pages/Login';
+import DoctorRequest from './pages/DoctorRequest'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
 import DoctorProfile from './pages/Doctor/DoctorProfile';
@@ -59,10 +60,15 @@ const App = () => {
       </div>
     </div>
   ) : (
-    <>
+    <div className="min-h-screen bg-[#F8F9FD]">
       <ToastContainer />
-      <Login />
-    </>
+      <Routes>
+        <Route path="/request" element={<DoctorRequest />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </div>
   )
 }
 

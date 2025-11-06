@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import doctorRequestModel from '../models/doctorRequestModel.js'
 
 // API for doctor Login 
 const loginDoctor = async (req, res) => {
@@ -190,6 +191,24 @@ const doctorDashboard = async (req, res) => {
     }
 }
 
+// API to allow doctors to request an account (public)
+const requestDoctor = async (req, res) => {
+    try {
+        const { name, email, phone, speciality, message } = req.body
+        if (!name || !email) return res.json({ success: false, message: 'Name and email are required' })
+
+        // avoid duplicate requests
+        const exists = await doctorRequestModel.findOne({ email })
+        if (exists) return res.json({ success: false, message: 'A request with this email already exists' })
+
+        const reqDoc = await doctorRequestModel.create({ name, email, phone, speciality, message })
+        res.json({ success: true, message: 'Request submitted. Admin will review and create your account.' })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
 export {
     loginDoctor,
     appointmentsDoctor,
@@ -200,4 +219,6 @@ export {
     doctorDashboard,
     doctorProfile,
     updateDoctorProfile
+    ,
+    requestDoctor
 }
