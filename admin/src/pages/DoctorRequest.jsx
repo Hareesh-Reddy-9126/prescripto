@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { getBackendUrl } from '../../utils/runtimeConfig'
+import { getBackendUrl } from '../utils/runtimeConfig'
 
 const DoctorRequest = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', speciality: '', message: '' })
