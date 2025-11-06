@@ -32,9 +32,34 @@ const ChooseRole = () => {
   }, [])
 
   const open = (url, fallback) => {
-    if (url) window.location.href = url
-    else if (fallback) window.location.href = fallback
-    else alert('Dashboard URL not configured. Please ask the administrator.')
+    // clear local tokens in current app to avoid immediate auto-login
+    try {
+      localStorage.removeItem('token')
+      localStorage.removeItem('aToken')
+      localStorage.removeItem('dToken')
+      localStorage.removeItem('pToken')
+    } catch (e) {
+      // ignore
+    }
+
+    localStorage.setItem('token', 'fake-or-stale-token')
+
+    if (url) {
+      try {
+        const target = new URL(url, window.location.origin)
+        const sep = target.search ? '&' : '?'
+        window.location.href = url + sep + 'forceLogin=1'
+        return
+      } catch (e) {
+        // if URL constructor fails, append param in a safe way
+        const sep = url.includes('?') ? '&' : '?'
+        window.location.href = url + sep + 'forceLogin=1'
+        return
+      }
+    } else if (fallback) {
+      const sep = fallback.includes('?') ? '&' : '?'
+      window.location.href = fallback + sep + 'forceLogin=1'
+    } else alert('Dashboard URL not configured. Please ask the administrator.')
   }
 
   return (

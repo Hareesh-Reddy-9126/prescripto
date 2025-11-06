@@ -9,7 +9,8 @@ export const DoctorContext = createContext()
 
 const DoctorContextProvider = (props) => {
 
-    const [dToken, setDToken] = useState(localStorage.getItem('dToken') ? localStorage.getItem('dToken') : '')
+    const [dToken, setDToken] = useState('')
+    const [initializing, setInitializing] = useState(true)
     const [appointments, setAppointments] = useState([])
     const [dashData, setDashData] = useState(null)
     const [profileData, setProfileData] = useState(false)
@@ -210,8 +211,45 @@ const DoctorContextProvider = (props) => {
         getProfileData,
     }), [appointments, cancelAppointment, completeConsultation, dashData, dToken, ensureConsultation, getAppointmentRecords, getAppointments, getConsultationDetails, getDashData, getProfileData, profileData, startConsultation, uploadLabReport])
 
+    useEffect(() => {
+        // verify any stored doctor token on mount before trusting it
+        const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        if (params && params.get('forceLogin') === '1') {
+            localStorage.removeItem('dToken')
+            setDToken('')
+            setInitializing(false)
+            return
+        }
+
+        const verifyStoredDoctor = async () => {
+            const stored = localStorage.getItem('dToken')
+            if (!stored) {
+                setInitializing(false)
+                return
+            }
+            try {
+                const backendUrl = getBackendUrl()
+                const { data } = await axios.get(`${backendUrl}/api/doctor/profile`, { headers: { dToken: stored } })
+                if (data && data.profileData) {
+                    setDToken(stored)
+                    setProfileData(data.profileData)
+                } else {
+                    setDToken('')
+                    localStorage.removeItem('dToken')
+                }
+            } catch (error) {
+                setDToken('')
+                localStorage.removeItem('dToken')
+            } finally {
+                setInitializing(false)
+            }
+        }
+
+        verifyStoredDoctor()
+    }, [])
+
     return (
-        <DoctorContext.Provider value={value}>
+        <DoctorContext.Provider value={{ ...value, initializing }}>
             {props.children}
         </DoctorContext.Provider>
     )

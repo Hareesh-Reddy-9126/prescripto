@@ -19,14 +19,23 @@ import DoctorProfile from './pages/Doctor/DoctorProfile';
 
 const App = () => {
 
-  const { dToken } = useContext(DoctorContext)
-  const { aToken } = useContext(AdminContext)
+  const { dToken, initializing: dInitializing } = useContext(DoctorContext)
+  const { aToken, initializing: aInitializing } = useContext(AdminContext)
 
   const defaultPath = useMemo(() => {
     if (aToken) return '/admin-dashboard'
     if (dToken) return '/doctor-dashboard'
     return '/'
   }, [aToken, dToken])
+
+  // while either context is verifying a stored token, avoid rendering login/dashboard flashes
+  if (dInitializing || aInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-sm text-slate-600">Checking session...</div>
+      </div>
+    )
+  }
 
   return dToken || aToken ? (
     <div className='bg-[#F8F9FD]'>

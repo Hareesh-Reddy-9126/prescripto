@@ -35,7 +35,7 @@ const createApiClient = (token) => {
 }
 
 export const PharmacistProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem('pToken') || '')
+  const [token, setToken] = useState('')
   const [pharmacy, setPharmacy] = useState(null)
   const [dashboard, setDashboard] = useState(null)
   const [orders, setOrders] = useState([])
@@ -148,6 +148,45 @@ export const PharmacistProvider = ({ children }) => {
   }, [api, token])
 
   useEffect(() => {
+    // On mount, if there's a stored token, verify it with the backend before trusting it.
+    // This prevents automatic access to the dashboard from stale/invalid tokens.
+    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+    if (params && params.get('forceLogin') === '1') {
+      // clear stored pharmacist token and skip verification
+      localStorage.removeItem('pToken')
+      setToken('')
+      setInitializing(false)
+    } else {
+      const verifyStoredToken = async () => {
+        const stored = localStorage.getItem('pToken')
+        if (!stored) {
+          setInitializing(false)
+          return
+        }
+
+        try {
+          setLoading(true)
+          const base = getBackendUrl() || 'http://localhost:4000'
+          // verify by calling profile endpoint with the stored token
+          const { data } = await axios.get(`${base}/api/pharmacist/profile`, { headers: { token: stored } })
+          if (data && data.success) {
+            // token is valid — persist and let the existing bootstrap effect run
+            persistToken(stored)
+          } else {
+            persistToken('')
+          }
+        } catch (error) {
+          // invalid or expired token
+          persistToken('')
+        } finally {
+          setLoading(false)
+          setInitializing(false)
+        }
+      }
+
+      verifyStoredToken()
+    }
+
     const bootstrap = async () => {
       if (!token) {
         setInitializing(false)

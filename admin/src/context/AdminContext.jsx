@@ -11,7 +11,8 @@ const AdminContextProvider = (props) => {
 
     // backendUrl resolved at runtime (build-time VITE or runtime deployed.json)
 
-    const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
+    const [aToken, setAToken] = useState('')
+    const [initializing, setInitializing] = useState(true)
 
     const [appointments, setAppointments] = useState([])
     const [doctors, setDoctors] = useState([])
@@ -220,8 +221,46 @@ const AdminContextProvider = (props) => {
         savePlatformSettings
     }), [aToken, appointments, cancelAppointment, changeAvailability, dashData, doctors, getAllAppointments, getAllDoctors, getDashData, getPharmacies, loadPlatformSettings, pharmacies, platformSettings, reviewPharmacy, savePlatformSettings, togglePharmacyActive])
 
+    useEffect(() => {
+        // Verify any stored admin token on mount before trusting it
+        const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        if (params && params.get('forceLogin') === '1') {
+            // clear stored admin token and skip verification
+            localStorage.removeItem('aToken')
+            setAToken('')
+            setInitializing(false)
+            return
+        }
+
+        const verifyStoredAdmin = async () => {
+            const stored = localStorage.getItem('aToken')
+            if (!stored) {
+                setInitializing(false)
+                return
+            }
+            try {
+                const backendUrl = getBackendUrl()
+                const { data } = await axios.get(`${backendUrl}/api/admin/dashboard`, { headers: { aToken: stored } })
+                if (data && data.success) {
+                    setAToken(stored)
+                    setDashData(data.dashData || null)
+                } else {
+                    localStorage.removeItem('aToken')
+                    setAToken('')
+                }
+            } catch (error) {
+                localStorage.removeItem('aToken')
+                setAToken('')
+            } finally {
+                setInitializing(false)
+            }
+        }
+
+        verifyStoredAdmin()
+    }, [])
+
     return (
-        <AdminContext.Provider value={value}>
+        <AdminContext.Provider value={{ ...value, initializing }}>
             {props.children}
         </AdminContext.Provider>
     )

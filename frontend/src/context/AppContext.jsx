@@ -14,8 +14,9 @@ const AppContextProvider = (props) => {
     // Note: keep this local inside callbacks to reflect any runtime changes.
 
     const [doctors, setDoctors] = useState([])
-    const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '')
+    const [token, setToken] = useState('')
     const [userData, setUserData] = useState(false)
+    const [initializing, setInitializing] = useState(true)
 
     // Getting Doctors using API
     const getDoctosData = useCallback(async () => {
@@ -65,9 +66,45 @@ const AppContextProvider = (props) => {
     }, [getDoctosData])
 
     useEffect(() => {
+        // if the URL contains ?forceLogin=1, clear any stored token and skip verification
+        const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        if (params && params.get('forceLogin') === '1') {
+            localStorage.removeItem('token')
+            setToken('')
+            setInitializing(false)
+            return
+        }
+
         if (token) {
             loadUserProfileData()
+            setInitializing(false)
+            return
         }
+
+        // verify stored token on mount
+        const verifyStored = async () => {
+            const stored = localStorage.getItem('token')
+            if (!stored) {
+                setInitializing(false)
+                return
+            }
+            try {
+                const backendUrl = getBackendUrl()
+                const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, { headers: { token: stored } })
+                if (data && data.success) {
+                    setToken(stored)
+                    setUserData(data.userData)
+                } else {
+                    localStorage.removeItem('token')
+                }
+            } catch (error) {
+                localStorage.removeItem('token')
+            } finally {
+                setInitializing(false)
+            }
+        }
+
+        verifyStored()
     }, [token, loadUserProfileData])
 
     const value = useMemo(() => ({
@@ -79,6 +116,7 @@ const AppContextProvider = (props) => {
         setToken,
         userData,
         setUserData,
+        initializing,
         loadUserProfileData,
     }), [currencySymbol, doctors, getDoctosData, loadUserProfileData, token, userData])
 
