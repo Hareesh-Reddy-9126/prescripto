@@ -21,7 +21,3 @@
 ::-webkit-scrollbar {
     @apply hidden
 }
-
-.body {
-    background: brown;
-}
