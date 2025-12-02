@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 const ChooseRole = () => {
   const [urls, setUrls] = useState({
@@ -9,27 +9,31 @@ const ChooseRole = () => {
     backend: import.meta.env.VITE_BACKEND_URL || ''
   })
 
+  const loadFallbackUrls = useCallback(() => {
+    fetch('/deployed.json')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return
+        setUrls(prev => ({
+          admin: prev.admin || data.adminUrl || '',
+          doctor: prev.doctor || data.doctorUrl || '',
+          pharmacist: prev.pharmacist || data.pharmacistUrl || '',
+          frontend: prev.frontend || data.frontendUrl || '',
+          backend: prev.backend || data.backendUrl || ''
+        }))
+      })
+      .catch(() => {
+        // ignore fetch errors — env vars may still be present
+      })
+  }, [])
+
   useEffect(() => {
     // if any URL missing, try to load fallback deployed.json hosted in public/
     const needsFallback = !urls.admin || !urls.pharmacist || !urls.frontend || !urls.backend
     if (needsFallback) {
-      fetch('/deployed.json')
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (!data) return
-          setUrls(prev => ({
-            admin: prev.admin || data.adminUrl || '',
-            doctor: prev.doctor || data.doctorUrl || '',
-            pharmacist: prev.pharmacist || data.pharmacistUrl || '',
-            frontend: prev.frontend || data.frontendUrl || '',
-            backend: prev.backend || data.backendUrl || ''
-          }))
-        })
-        .catch(() => {
-          // ignore fetch errors — env vars may still be present
-        })
+      loadFallbackUrls()
     }
-  }, [])
+  }, [urls.admin, urls.pharmacist, urls.frontend, urls.backend, loadFallbackUrls])
 
   const normalizeUrl = (u) => {
     if (!u) return ''
@@ -83,7 +87,7 @@ const ChooseRole = () => {
     <div className="min-h-[70vh] flex items-center justify-center">
       <div className="w-full max-w-xl p-8 bg-white rounded-xl shadow">
         <h2 className="text-2xl font-semibold mb-4">Choose your dashboard</h2>
-        <p className="mb-6 text-sm text-gray-600">Select the role you want to sign in as. If your project's live URL is configured, you'll be redirected to that app's login page.</p>
+        <p className="mb-6 text-sm text-gray-600">Select the role you want to sign in as. If your project&apos;s live URL is configured, you&apos;ll be redirected to that app&apos;s login page.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button onClick={() => {

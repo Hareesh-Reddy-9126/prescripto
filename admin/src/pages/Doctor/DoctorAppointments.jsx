@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
@@ -46,8 +46,6 @@ const DoctorAppointments = () => {
     }, {})
     setConsultationStatus(statusMap)
   }, [appointments])
-
-  const upcomingAppointments = useMemo(() => appointments.filter((item) => !item.cancelled), [appointments])
 
   const handleJoinConsultation = async (appointmentId) => {
     const scheduled = await ensureConsultation(appointmentId)

@@ -1,9 +1,16 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
+import PropTypes from 'prop-types'
 import { AdminContext } from '../../context/AdminContext'
 
 const Pill = ({ label, active, onClick }) => (
   <button onClick={onClick} className={`px-4 py-2 rounded-full text-sm border ${active ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 border-slate-200'}`}>{label}</button>
 )
+
+Pill.propTypes = {
+  label: PropTypes.string.isRequired,
+  active: PropTypes.bool,
+  onClick: PropTypes.func,
+}
 
 const Pharmacies = () => {
   const { aToken, pharmacies, getPharmacies, reviewPharmacy, togglePharmacyActive } = useContext(AdminContext)

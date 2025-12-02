@@ -1,4 +1,4 @@
-import React from 'react'
+import PropTypes from 'prop-types'
 
 // Simple Avatar component that always crops the image to a circle.
 // Props:
@@ -11,6 +11,13 @@ const Avatar = ({ src, alt = 'avatar', sizeClass = 'w-8 h-8', className = '' }) 
       <img src={src} alt={alt} className="w-full h-full object-cover" />
     </div>
   )
+}
+
+Avatar.propTypes = {
+  src: PropTypes.string,
+  alt: PropTypes.string,
+  sizeClass: PropTypes.string,
+  className: PropTypes.string,
 }
 
 export default Avatar

@@ -1,6 +1,7 @@
 import prescriptionModel from "../models/prescriptionModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import pharmacyOrderModel from "../models/pharmacyOrderModel.js";
+import doctorModel from "../models/doctorModel.js";
 import { notifyPatient } from "../utils/notificationService.js";
 
 const normalizeArray = (value) => {

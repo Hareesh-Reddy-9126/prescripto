@@ -131,7 +131,7 @@ const AppContextProvider = (props) => {
         setUserData,
         initializing,
         loadUserProfileData,
-    }), [currencySymbol, doctors, getDoctosData, loadUserProfileData, token, userData])
+    }), [currencySymbol, doctors, getDoctosData, loadUserProfileData, token, userData, initializing])
 
     return (
         <AppContext.Provider value={value}>

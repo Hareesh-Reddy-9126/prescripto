@@ -206,7 +206,7 @@ export const PharmacistProvider = ({ children }) => {
     }
 
     bootstrap()
-  }, [token, fetchProfile, fetchDashboard, fetchOrders, logout])
+  }, [token, fetchProfile, fetchDashboard, fetchOrders, logout, persistToken])
 
   const value = {
     token,

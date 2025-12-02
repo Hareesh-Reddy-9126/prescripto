@@ -76,17 +76,17 @@ const Login = () => {
     try {
       const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
       if (params && params.get('forceLogin') === '1') {
-        try { localStorage.removeItem('token') } catch (e) {}
+        try { localStorage.removeItem('token') } catch (err) { /* ignore storage errors */ }
         setToken('')
       }
-    } catch (e) {
-      // ignore
+    } catch (err) {
+      // ignore URL parsing errors
     }
 
     if (token && !initializing) {
       navigate('/')
     }
-  }, [navigate, token, initializing])
+  }, [navigate, token, initializing, setToken])
 
   // Sync state with query param (?tab=signup|login)
   useEffect(() => {
