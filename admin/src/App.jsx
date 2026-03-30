@@ -12,6 +12,7 @@ import AddDoctor from './pages/Admin/AddDoctor';
 import DoctorsList from './pages/Admin/DoctorsList';
 import Pharmacies from './pages/Admin/Pharmacies';
 import Settings from './pages/Admin/Settings';
+import DatabaseViewer from './pages/Admin/DatabaseViewer';
 import Login from './pages/Login';
 import DoctorRequest from './pages/DoctorRequest'
 import DoctorAppointments from './pages/Doctor/DoctorAppointments';
@@ -55,6 +56,7 @@ const App = () => {
           <Route path='/doctor-profile' element={<DoctorProfile />} />
           <Route path='/pharmacies' element={<Pharmacies />} />
           <Route path='/settings' element={<Settings />} />
+          <Route path='/database-viewer' element={<DatabaseViewer />} />
           <Route path='*' element={<Navigate to={defaultPath} replace />} />
         </Routes>
       </div>

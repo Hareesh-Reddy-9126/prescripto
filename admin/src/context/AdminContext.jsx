@@ -201,6 +201,41 @@ const AdminContextProvider = (props) => {
         return false
     }, [aToken])
 
+    const getDatabaseTables = useCallback(async () => {
+        if (!aToken) return null
+        try {
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.get(`${backendUrl}/api/admin/db/tables`, { headers: { aToken } })
+            if (data.success) {
+                return data
+            }
+            toast.error(data.message)
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+        return null
+    }, [aToken])
+
+    const getDatabaseRows = useCallback(async ({ table, page = 1, limit = 25 }) => {
+        if (!aToken) return null
+        try {
+            const backendUrl = getBackendUrl()
+            const { data } = await axios.get(`${backendUrl}/api/admin/db/rows`, {
+                params: { table, page, limit },
+                headers: { aToken },
+            })
+            if (data.success) {
+                return data
+            }
+            toast.error(data.message)
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+        return null
+    }, [aToken])
+
     const value = useMemo(() => ({
         aToken,
         setAToken,
@@ -218,8 +253,10 @@ const AdminContextProvider = (props) => {
         togglePharmacyActive,
         platformSettings,
         loadPlatformSettings,
-        savePlatformSettings
-    }), [aToken, appointments, cancelAppointment, changeAvailability, dashData, doctors, getAllAppointments, getAllDoctors, getDashData, getPharmacies, loadPlatformSettings, pharmacies, platformSettings, reviewPharmacy, savePlatformSettings, togglePharmacyActive])
+        savePlatformSettings,
+        getDatabaseTables,
+        getDatabaseRows,
+    }), [aToken, appointments, cancelAppointment, changeAvailability, dashData, doctors, getAllAppointments, getAllDoctors, getDashData, getDatabaseRows, getDatabaseTables, getPharmacies, loadPlatformSettings, pharmacies, platformSettings, reviewPharmacy, savePlatformSettings, togglePharmacyActive])
 
     useEffect(() => {
         // Verify any stored admin token on mount before trusting it
